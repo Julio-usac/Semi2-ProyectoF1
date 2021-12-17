@@ -182,7 +182,7 @@ def transform_1():
         reader2.drop(columns=['Indicator Code'],inplace=True)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron las columnas de economia'})
         #eliminar filas con nulos
-        reader2.drop([2,4],axis=0)
+        reader2.drop([1,3],inplace=True)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron filas de economia'})
         #Data Limpia
         reader2.to_csv('clean_data_econo.csv', encoding='utf-8', index=False)
