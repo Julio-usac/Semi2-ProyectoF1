@@ -138,9 +138,13 @@ def extraer_0():
 
 def transform_1():
     global reader
+    global reader2
+    
     print('Realizando la transformacion de los datos ...')
     print('...')
+
     try:
+        #COVID
         print(reader.isnull().sum().sort_values(ascending=False))
         reader.drop(columns=['weekly_icu_admissions'],inplace=True)
         reader.drop(columns=['weekly_icu_admissions_per_million'],inplace=True)
@@ -161,16 +165,30 @@ def transform_1():
         reader.drop(columns=['total_deaths_per_million'],inplace=True)
         reader.drop(columns=['new_deaths_per_million'],inplace=True)
         reader.drop(columns=['new_cases_per_million'],inplace=True)
-        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron las columnas'})
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron las columnas de covid'})
         #replazar nan por 0 en las columans vacias tipo float
         reader = reader.fillna(0)
         reader['continent'] = reader['continent'].replace(0, '')
         reader['tests_units'] = reader['tests_units'].replace(0, '')
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se corrigio el formato'})
         #Data Limpia
-        reader.to_csv('clean_data.csv', encoding='utf-8', index=False)
+        reader.to_csv('clean_data.csv', encoding='utf-8', index=False)        
         print('')
-        print('***** ---Transformacion realizado con exito--- *****')
+        print('***** ---Transformacion realizado con exito--- *****\n')
+
+        #ECONOMIA
+        print(reader2.isnull().sum().sort_values(ascending=False))
+        reader2.drop(columns=['Indicator Name'],inplace=True)
+        reader2.drop(columns=['Indicator Code'],inplace=True)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron las columnas de economia'})
+        #eliminar filas con nulos
+        reader2.drop([2,4],axis=0)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron filas de economia'})
+        #Data Limpia
+        reader2.to_csv('clean_data_econo.csv', encoding='utf-8', index=False)
+        print('')
+        print('***** ---Transformacion realizado con exito--- *****\n')
+        
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
