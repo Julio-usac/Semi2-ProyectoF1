@@ -18,6 +18,7 @@ def generar_reporte(contenido):
         file.close()
     except Exception as e:
         print(e)
+        
 def generacion_archivo(opcion,datos):
     file=""
     if opcion == 1:
@@ -112,14 +113,21 @@ def generacion_archivo(opcion,datos):
             file = file + "|------------------------|\n"
             file = file + f'''| {row[0]} | {row[1]} |\n'''
     return file
+
 def extraer_0():
     print('Extrayendo informacion ...')
     print('...')
     try:
         print(reader)
-        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'extraer','descripcion':'Se extrajo la informacion'})
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'extraer','descripcion':'Se extrajo la informacion de covid19'})
         print('')
-        print('***** ---La extraccion se realizado con exito--- *****')
+        print('***** ---La extraccion se realizado con exito--- *****\n')
+
+        print(reader2)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'extraer','descripcion':'Se extrajo la informacion de economia'})
+        print('')
+        print('***** ---La extraccion se realizado con exito--- *****\n')
+        
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
@@ -249,6 +257,7 @@ def menu(accion='',s=45):
     return op
 
 reader = pd.read_csv(Path(__file__).with_name('Dataset Covid19.csv'))
+reader2 = pd.read_csv(Path(__file__).with_name('Dataset Economia.csv'))
 bitacora = []
 now = datetime.now()
 server='DESKTOP-6RRBLEB\SQLEXPRESS'
