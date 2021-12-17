@@ -1,5 +1,5 @@
+USE covid;
 DROP TABLE IF EXISTS Temporal_PIB;
-
 CREATE TABLE Temporal_PIB(
 	id int IDENTITY(1,1) PRIMARY KEY,
 	pais varchar(255),
