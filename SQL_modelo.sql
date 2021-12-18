@@ -11,6 +11,7 @@ CREATE TABLE Continente(
 CREATE TABLE Pais(
 
 	id_Pais INT PRIMARY KEY IDENTITY (1, 1),
+	iso varchar(100),
 	nombre varchar(100),
 	populationn float,
 	population_density float,
@@ -61,7 +62,8 @@ CREATE TABLE PIB_data(
 
 	id_pib INT PRIMARY KEY IDENTITY (1, 1),
 	yearr int,
-	pib float
+	pib float,
+	iso varchar(100)
 );
 
 CREATE TABLE Covid_PIB(
