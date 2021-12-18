@@ -183,6 +183,8 @@ def transform_1():
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron las columnas de economia'})
         #eliminar filas con nulos
         reader2.drop([1,3],inplace=True)
+        #replazar nan por 0 en las columans vacias tipo float
+        reader2 = reader2.fillna(0)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se limpiaron filas de economia'})
         #Data Limpia
         reader2.to_csv('clean_data_econo.csv', encoding='utf-8', index=False)
@@ -201,6 +203,7 @@ def cargar_temp_2():
     print('Realizando Carga a las tablas temporales ...')
     print('...')
     try:
+        #COVID
         conn = pyodbc.connect(conn_data)
         #Creacion para tabla temporal
         inputdir0 = Path(__file__).with_name('SQL_esquema.sql')
@@ -210,7 +213,7 @@ def cargar_temp_2():
                 if statement0:
                     with conn.cursor() as cur2:
                         cur2.execute(statement0)
-        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se creo la tabla temporal'})
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se creo la tabla temporal covid'})
         #Insercion  para la temporal
         inputdir = Path(__file__).with_name('clean_data.csv')
         with inputdir.open('r') as creats:
@@ -231,9 +234,48 @@ def cargar_temp_2():
                 else:
                     contador+=1
         conn.close()
-        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se cargaron los datos a la tabla temporal'})
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se cargaron los datos a la tabla temporal covid'})
         print('')
-        print('***** ---Carga realizado con exito--- *****')
+        print('***** ---Carga realizado con exito--- *****\n')
+
+        #ECONOMIA
+        conn = pyodbc.connect(conn_data)
+        #Creacion para tabla temporal
+        inputdir1 = Path(__file__).with_name('SQL_PIB.sql')
+        with inputdir1.open('r') as creats1:
+            sqlScript1 = creats1.read()
+            for statement1 in sqlScript1.split(';'):
+                if statement1:
+                    with conn.cursor() as cur2:
+                        cur2.execute(statement1)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se creo la tabla temporal economia'})
+        #Insercion  para la temporal
+        inputdir2 = Path(__file__).with_name('clean_data_econo.csv')
+        with inputdir2.open('r',encoding="utf8") as creats2:
+            reader2 = csv.reader(creats2)
+            contador = 0
+            for row in reader2:
+                if contador != 0:
+                    data =f"""INSERT INTO Temporal_PIB (pais,iso,ano_1960,ano_1961,ano_1962,ano_1963,ano_1964,ano_1965,ano_1966,ano_1967,ano_1968,ano_1969,ano_1970,ano_1971,
+                              ano_1972,ano_1973,ano_1974,ano_1975,ano_1976,ano_1977,ano_1978,ano_1979,ano_1980,ano_1981,ano_1982,ano_1983,ano_1984,ano_1985,ano_1986,ano_1987,
+                              ano_1988,ano_1989,ano_1990,ano_1991,ano_1992,ano_1993,ano_1994,ano_1995,ano_1996,ano_1997,ano_1998,ano_1999,ano_2000,ano_2001,ano_2002,ano_2003,
+                              ano_2004,ano_2005,ano_2006,ano_2007,ano_2008,ano_2009,ano_2010,ano_2011,ano_2012,ano_2013,ano_2014,ano_2015,ano_2016,ano_2017,ano_2018,ano_2019,
+                              ano_2020) 
+                            VALUES ('{row[0].replace("'","")}', '{row[1].replace("'","")}',{row[2]}, {row[3]},{row[4]}, {row[5]},{row[6]},
+                            {row[7]},{row[8]},{row[9]},{row[10]},{row[11]}, {row[12]},{row[13]}, {row[14]},'{row[15].replace("'","")}', {row[16]},{row[17]}, {row[18]},{row[19]},
+                            {row[20]},{row[21]},{row[22]},{row[23]},{row[24]},{row[25]},{row[26]},{row[27]},{row[28]},{row[29]},{row[30]},{row[31]},{row[32]},{row[33]},{row[34]},
+                            {row[35]},{row[36]},{row[37]},{row[38]},{row[39]},{row[40]},{row[41]},{row[42]},{row[43]},{row[44]},{row[45]},{row[46]},{row[47]},{row[48]},{row[49]},
+                            {row[50]},{row[51]},{row[52]},{row[53]},{row[54]},{row[55]},{row[56]},{row[57]},{row[58]},{row[59]},{row[60]},{row[61]},{row[62]})"""
+                    with conn.cursor() as cur:
+                        cur.execute(data)
+                else:
+                    contador+=1
+        conn.close()
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se cargaron los datos a la tabla temporal economia'})
+        print('')
+        print('***** ---Carga realizado con exito--- *****\n')
+
+
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
