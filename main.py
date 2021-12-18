@@ -199,6 +199,31 @@ def transform_1():
         _=input('Enter para continuar--$>')
         return ''
 
+
+def crear_modelo_0():
+    print('Realizando Carga a las tablas temporales ...')
+    print('...')
+    try:
+        conn = pyodbc.connect(conn_data)
+        #Creacion de modelo
+        inputdir1 = Path(__file__).with_name('SQL_modelo.sql')
+        with inputdir1.open('r') as creats1:
+            sqlScript1 = creats1.read()
+            for statement0 in sqlScript1.split(';'):
+                if statement0:
+                    with conn.cursor() as cur3:
+                        cur3.execute(statement0)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el modelo'})
+        conn.close()
+        print('***** ---Modelo creado con exito--- *****')
+        _=input('Enter para continuar--$>')
+        return ''
+    except Exception as e:
+        print('')
+        print(f'Error al ejecutar el script: {e}')
+        _=input('Enter para continuar--$>')
+        return ''
+
 def cargar_temp_2():
     print('Realizando Carga a las tablas temporales ...')
     print('...')
@@ -330,7 +355,7 @@ opciones ={
     '0' : {'Des': 'Extraer informacion', 'Funcion': extraer_0, 'Param1':'p1','Param2' :'p2'},
     '1' : {'Des': 'Transformacion de Informacion', 'Funcion': transform_1, 'Param1':'p1','Param2' :'p2'},
     '2' : {'Des': 'Carga', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
-    '3' : {'Des': 'Crear Modelo', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
+    '3' : {'Des': 'Crear Modelo', 'Funcion': crear_modelo_0, 'Param1':'p1','Param2' :'p2'},
     '4' : {'Des': 'Crear Datamarts', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
     '5' : {'Des': 'Realizar Consultas', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
     'x' : {'Des': 'Salir', 'Funcion': cerrando_programa, 'Param1':'p1','Param2' :'p2'}
