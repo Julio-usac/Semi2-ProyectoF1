@@ -201,7 +201,7 @@ def transform_1():
 
 
 def crear_modelo_0():
-    print('Realizando Carga a las tablas temporales ...')
+    print('Realizando Creacion de modelo ...')
     print('...')
     try:
         conn = pyodbc.connect(conn_data)
@@ -214,8 +214,30 @@ def crear_modelo_0():
                     with conn.cursor() as cur3:
                         cur3.execute(statement0)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el modelo'})
+       
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO Continente(nombre) SELECT DISTINCT continent from Temporal''')
+        conn.commit()
+        cursor.execute('''INSERT INTO Pais(iso,nombre,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
+                            extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers,
+                            male_smokers,handwashing_facilities,hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente)
+                        SELECT iso_code, locationn,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
+                        extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers, male_smokers,handwashing_facilities,
+                        hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente FROM Temporal, Continente
+                        WHERE Temporal.continent=Continente.nombre;
+                       ''')
+        conn.commit()
+        cursor.execute('''INSERT INTO Covid_data(datee,total_cases,new_cases,total_deaths,new_deaths,reproduction_rate,icu_patients,hosp_patients,new_tests,
+                            total_tests,positive_rate,tests_per_case,tests_units,total_vaccinations,people_vaccinated,people_fully_vaccinated,total_boosters,new_vaccinations,
+                            stringency_index, excess_mortality)
+                        SELECT datee,total_cases,new_cases,total_deaths,new_deaths,reproduction_rate,icu_patients,hosp_patients,new_tests,
+                            total_tests,positive_rate,tests_per_case,tests_units,total_vaccinations,people_vaccinated,people_fully_vaccinated,total_boosters,new_vaccinations,
+                            stringency_index, excess_mortality FROM Temporal;
+                       ''')
+        conn.commit()
+
         conn.close()
-        print('***** ---Modelo creado con exito--- *****')
+        print('***** ---Modelo creado y cargado con exito--- *****')
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
