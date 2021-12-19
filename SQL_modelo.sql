@@ -1,15 +1,15 @@
-
 use covid;
-
-
+DROP TABLE IF EXISTS Covid_PIB;
+DROP TABLE IF EXISTS PIB_data;
+DROP TABLE IF EXISTS Covid_data;
+DROP TABLE IF EXISTS Pais;
+DROP TABLE IF EXISTS Continente;
 CREATE TABLE Continente(
-
 	id_continente INT PRIMARY KEY IDENTITY (1, 1),
 	nombre varchar(100)
 );
 
 CREATE TABLE Pais(
-
 	id_Pais INT PRIMARY KEY IDENTITY (1, 1),
 	iso varchar(100),
 	nombre varchar(100),
@@ -30,12 +30,11 @@ CREATE TABLE Pais(
 	human_development_index float,
 	id_continente INT,
     FOREIGN KEY (id_continente) REFERENCES Continente(id_continente)
-
 );
 
 CREATE TABLE Covid_data(
-
 	id_covid INT PRIMARY KEY IDENTITY (1, 1),
+	iso varchar(100),
 	datee varchar(255),
 	total_cases float,
 	new_cases float,
@@ -59,7 +58,6 @@ CREATE TABLE Covid_data(
 );
 
 CREATE TABLE PIB_data(
-
 	id_pib INT PRIMARY KEY IDENTITY (1, 1),
 	yearr int,
 	pib float,
@@ -67,7 +65,6 @@ CREATE TABLE PIB_data(
 );
 
 CREATE TABLE Covid_PIB(
-
 	id_Pais INT,
 	id_pib INT,
 	id_covid INT,
@@ -75,7 +72,3 @@ CREATE TABLE Covid_PIB(
 	FOREIGN KEY (id_pib) REFERENCES PIB_data(id_pib),
 	FOREIGN KEY (id_covid) REFERENCES Covid_data(id_covid),
 );
-
-
-
-
