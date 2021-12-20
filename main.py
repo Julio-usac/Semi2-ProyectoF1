@@ -200,6 +200,51 @@ def transform_1():
         return ''
 
 
+def crear_datamarts_0():
+    print('Realizando Creacion de datamarts ...')
+    print('...')
+    try:
+        conn = pyodbc.connect(conn_data)
+        #Creacion de datamart covid
+        inputdir1 = Path(__file__).with_name('SQL_datamart_covid.sql')
+        with inputdir1.open('r') as creats1:
+            sqlScript1 = creats1.read()
+            for statement0 in sqlScript1.split(';'):
+                if statement0:
+                    with conn.cursor() as cur3:
+                        cur3.execute(statement0)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el datamart covid'})
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO Continente2(nombre) SELECT DISTINCT continent FROM Temporal''')
+        conn.commit()
+        cursor.execute('''INSERT INTO Pais2(iso,nombre,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
+                            extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers,
+                            male_smokers,handwashing_facilities,hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente)
+                        SELECT DISTINCT iso_code, locationn,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
+                        extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers, male_smokers,handwashing_facilities,
+                        hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente FROM Temporal, Continente2
+                        WHERE Temporal.continent=Continente2.nombre;
+                       ''')
+        conn.commit()
+        cursor.execute('''INSERT INTO Covid_data2(datee,total_cases,new_cases,total_deaths,new_deaths,reproduction_rate,icu_patients,hosp_patients,new_tests,
+                            total_tests,positive_rate,tests_per_case,tests_units,total_vaccinations,people_vaccinated,people_fully_vaccinated,total_boosters,new_vaccinations,
+                            stringency_index, excess_mortality,id_Pais)
+                        SELECT datee,total_cases,new_cases,total_deaths,new_deaths,reproduction_rate,icu_patients,hosp_patients,new_tests,
+                            total_tests,positive_rate,tests_per_case,tests_units,total_vaccinations,people_vaccinated,people_fully_vaccinated,total_boosters,new_vaccinations,
+                            stringency_index, excess_mortality, id_Pais FROM Temporal, Pais2
+                            WHERE Temporal.locationn=Pais2.nombre;
+                       ''')
+        conn.commit()
+        conn.close()
+        print('***** ---Datamarts creados y cargados con exito--- *****')
+        _=input('Enter para continuar--$>')
+        return ''
+    except Exception as e:
+        print('')
+        print(f'Error al ejecutar el script: {e}')
+        _=input('Enter para continuar--$>')
+        return ''
+
 def crear_modelo_0():
     print('Realizando Creacion de modelo ...')
     print('...')
@@ -221,7 +266,7 @@ def crear_modelo_0():
         cursor.execute('''INSERT INTO Pais(iso,nombre,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
                             extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers,
                             male_smokers,handwashing_facilities,hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente)
-                        SELECT iso_code, locationn,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
+                        SELECT DISTINCT iso_code, locationn,populationn,population_density,median_age,aged_65_older,aged_70_older,gdp_per_capita,
                         extreme_poverty,cardiovasc_death_rate,diabetes_prevalence,female_smokers, male_smokers,handwashing_facilities,
                         hospital_beds_per_thousand,life_expectancy,human_development_index,id_continente FROM Temporal, Continente
                         WHERE Temporal.continent=Continente.nombre;
@@ -437,13 +482,13 @@ bd = 'tnami'
 user = 'hdb1'
 password = '1234'
 conn_data = 'DRIVER={ODBC Driver 17 for SQL server}; SERVER='+server+'; DATABASE='+bd+'; UID='+user+'; PWD='+password
-
+#conn_data='Driver={SQL Server};''Server=DJULIO\MSSQLSERVER01;''Database=covid;''Trusted_Connection=yes;'
 opciones ={
     '0' : {'Des': 'Extraer informacion', 'Funcion': extraer_0, 'Param1':'p1','Param2' :'p2'},
     '1' : {'Des': 'Transformacion de Informacion', 'Funcion': transform_1, 'Param1':'p1','Param2' :'p2'},
     '2' : {'Des': 'Carga', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
     '3' : {'Des': 'Crear Modelo', 'Funcion': crear_modelo_0, 'Param1':'p1','Param2' :'p2'},
-    '4' : {'Des': 'Crear Datamarts', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
+    '4' : {'Des': 'Crear Datamarts', 'Funcion': crear_datamarts_0, 'Param1':'p1','Param2' :'p2'},
     '5' : {'Des': 'Realizar Consultas', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
     'x' : {'Des': 'Salir', 'Funcion': cerrando_programa, 'Param1':'p1','Param2' :'p2'}
     }
