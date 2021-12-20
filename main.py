@@ -298,8 +298,7 @@ def crear_modelo_0():
         cursor.execute('''INSERT INTO PIB_Data(yearr, iso, pib) SELECT '2019', iso, ano_2019 FROM Temporal_PIB''')
         cursor.execute('''INSERT INTO PIB_Data(yearr, iso, pib) SELECT '2020', iso, ano_2020 FROM Temporal_PIB''')
         conn.commit()
-
-        
+        cursor.execute('''INSERT INTO Covid_PIB(id_Pais, id_pib) SELECT DISTINCT pais.id_Pais, PIB_data.id_pib FROM pais INNER JOIN PIB_data ON pais.iso = PIB_data.iso''')
         conn.commit()
 
         conn.close()
