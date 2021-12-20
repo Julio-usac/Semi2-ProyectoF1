@@ -44,100 +44,67 @@ def reporte_bitacora():
         _=input('Enter para continuar--$>')
         return ''
 
-def generacion_archivo(opcion,datos):
-    file=""
-    if opcion == 1:
-        file = file + "#######################Consulta No.1#######################\n"
-        file = file + "| Table_name | Row_count |\n"
-        for row in datos:
-            if  row[1] != "sysdiagrams":
-                file = file + "|------------------------|\n"
-                file = file + f'''| {row[1]} | {row[2]} |\n'''
-    elif opcion == 2:
-        file = file + "#######################Consulta No.2#######################\n"
-        encabezados = 0
-        contador = 0
-        auxiliar =""
-        cuerpo = ""
-        for row in datos:
-            if row[0] != auxiliar:
-                auxiliar = row[0]
-                cuerpo = cuerpo + "\n|------------------------------------------------------------------------|\n"
-                cuerpo = cuerpo + f'''| {row[0]} | {row[1]} |'''
-                if contador > encabezados:
-                    encabezados = contador
-                contador = 1
-            else:
-                cuerpo = cuerpo + f''' {row[1]} |'''
-                contador += 1
-        file = file + "| Año |"
-        for i in range(encabezados):
-            file = file + f''' Pais{i+1} |'''
-        file = file + cuerpo + "\n"
-    elif opcion == 3:
-        file = file + "#######################Consulta No.3#######################\n"
-        encabezados = 0
-        contador = 0
-        auxiliar =""
-        cuerpo = ""
-        for row in datos:
-            if row[0] != auxiliar:
-                auxiliar = row[0]
-                cuerpo = cuerpo + "\n|------------------------------------------------------------------------|\n"
-                cuerpo = cuerpo + f'''| {row[0]} | {row[1]} |'''
-                if contador > encabezados:
-                    encabezados = contador
-                contador = 1
-            else:
-                cuerpo = cuerpo + f''' {row[1]} |'''
-                contador += 1
-        file = file + "| Pais |"
-        for i in range(encabezados):
-            file = file + f''' Año{i+1} |'''
-        file = file + cuerpo + "\n"
-    if opcion == 4:
-        file = file + "#######################Consulta No.4#######################\n"
-        file = file + "| Pais | Promedio Total_Damage |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 5:
-        file = file + "#######################Consulta No.5#######################\n"
-        file = file + "| Pais | Total_Muertes |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 6:
-        file = file + "#######################Consulta No.6#######################\n"
-        file = file + "| Año | Total_Muertes |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 7:
-        file = file + "#######################Consulta No.7#######################\n"
-        file = file + "| Año | Total_tsunamis |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 8:
-        file = file + "#######################Consulta No.8#######################\n"
-        file = file + "| Pais | Total_Casas_Destruidas |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 9:
-        file = file + "#######################Consulta No.9#######################\n"
-        file = file + "| Pais | Total_Casas_Dañadas |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    if opcion == 10:
-        file = file + "#######################Consulta No.10#######################\n"
-        file = file + "| Pais | Promedio_Altura_Agua |\n"
-        for row in datos:
-            file = file + "|------------------------|\n"
-            file = file + f'''| {row[0]} | {row[1]} |\n'''
-    return file
+def generacion_archivo():
+    
+    conn = pyodbc.connect(conn_data)
+    cursor = conn.cursor()
+
+    f=open("consultas.txt","w")
+
+    f.write("Consulta 1\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''select Continente2.nombre as Continente, sum(new_deaths) as Muertes FROM Continente2, Pais2, Covid_data2
+                        WHERE Continente2.id_continente= Pais2.id_continente and Continente2.nombre!=''
+                        and Pais2.id_Pais=Covid_data2.id_Pais 
+                        Group by Continente2.nombre;''')
+    f.write("Continente, Muertes\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 2\n")
+    f.write("-----------------------------------------------------------\n")
+
+    cursor.execute('''select year(datee) as año, total_cases from Covid_data2, Pais2
+                        WHERE Covid_data2.id_Pais= Pais2.id_Pais and Covid_data2.datee='09/12/2021'and  Pais2.nombre='World'
+                        union
+                        select year(datee) as año, total_cases from Covid_data2, Pais2
+                        WHERE Covid_data2.id_Pais= Pais2.id_Pais and Covid_data2.datee='09/12/2020'and  Pais2.nombre='World';''')
+    f.write("Año,  Total de casos\n")
+    for i in cursor:
+        f.write(str(i[0])+"||"+str(i[1])+"\n")
+    
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 3\n")
+    f.write("-----------------------------------------------------------\n")
+
+    cursor.execute('''select TOP 10 Pais2.nombre, Pais2.median_age, sum(new_deaths) as Muertes FROM Pais2,Covid_data2
+                        WHERE Pais2.id_Pais=Covid_data2.id_Pais
+                        group by nombre,median_age
+                        ORDER BY median_age desc;''')
+    f.write("Nombre,  Promedio edad, Muertes\n")
+    for i in cursor:
+        f.write(str(i[0])+"||"+str(i[1])+"||"+str(i[2])+"\n")
+    
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 4\n")
+    f.write("-----------------------------------------------------------\n")
+
+    cursor.execute('''select TOP 5 Pais2.nombre,year(datee) as año, avg(new_vaccinations) as vacunaciones from Pais2, Covid_data2
+                        where Pais2.id_Pais= Covid_data2.id_Pais and Pais2.nombre!='World' and Pais2.nombre!='Asia' and Pais2.nombre!='Upper middle income'
+                        and Pais2.nombre!='Lower middle income' and Pais2.nombre!='High income' and Pais2.nombre!='Europe' and Pais2.nombre!='North America'
+                        and Pais2.nombre!='European Union' and Pais2.nombre!='South America'
+                        group by Pais2.nombre, year(datee) 
+                        order by vacunaciones desc;''')
+    f.write("Nombre,  Año, Vacunaciones\n")
+    for i in cursor:
+        f.write(str(i[0])+"||"+str(i[1])+"||"+str(i[2])+"\n")
+    
+    f.write("\n-----------------------------------------------------------\n")
+    f.close()
 
 def extraer_0():
     print('Extrayendo informacion ...')
@@ -552,14 +519,14 @@ bd = 'tnami'
 user = 'hdb1'
 password = '1234'
 conn_data = 'DRIVER={ODBC Driver 17 for SQL server}; SERVER='+server+'; DATABASE='+bd+'; UID='+user+'; PWD='+password
-#conn_data='Driver={SQL Server};''Server=DJULIO\MSSQLSERVER01;''Database=covid;''Trusted_Connection=yes;'
+conn_data='Driver={SQL Server};''Server=DJULIO\MSSQLSERVER01;''Database=covid;''Trusted_Connection=yes;'
 opciones ={
     '0' : {'Des': 'Extraer informacion', 'Funcion': extraer_0, 'Param1':'p1','Param2' :'p2'},
     '1' : {'Des': 'Transformacion de Informacion', 'Funcion': transform_1, 'Param1':'p1','Param2' :'p2'},
     '2' : {'Des': 'Carga', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
     '3' : {'Des': 'Crear Modelo', 'Funcion': crear_modelo_0, 'Param1':'p1','Param2' :'p2'},
     '4' : {'Des': 'Crear Datamarts', 'Funcion': crear_datamarts_0, 'Param1':'p1','Param2' :'p2'},
-    '5' : {'Des': 'Realizar Consultas', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
+    '5' : {'Des': 'Realizar Consultas', 'Funcion': generacion_archivo, 'Param1':'p1','Param2' :'p2'},
     '6' : {'Des': 'Realizar bitacora', 'Funcion': reporte_bitacora, 'Param1':'p1','Param2' :'p2'},
     'x' : {'Des': 'Salir', 'Funcion': cerrando_programa, 'Param1':'p1','Param2' :'p2'}
     }
