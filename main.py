@@ -163,6 +163,91 @@ def generacion_archivo():
          f.write(str(i[0])+"||"+str(i[1])+"\n")
   
     f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 9\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT TOP 10 t2.CANTIDAD_2020, t3.CANTIDAD_2019 
+                        FROM (
+                            SELECT cantidad_pib AS CANTIDAD_2020,cyear_id FROM Calculo_year WHERE cyear_id=(SELECT id_year FROM Cyear WHERE n_year='2020')
+                            ) t2
+                        INNER JOIN (
+                                SELECT cantidad_pib AS CANTIDAD_2019,cyear_id FROM Calculo_year WHERE cyear_id=(SELECT id_year FROM Cyear WHERE n_year='2019')
+                            )  t3
+                        ON t2.cyear_id<>t3.cyear_id ORDER BY t2.CANTIDAD_2020 DESC, t3.CANTIDAD_2019 DESC;''')
+    f.write("CANTIDAD_2020, CANTIDAD_2019\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 10\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT  t2.Pais, (t2.CANTIDAD_2020 - t3.CANTIDAD_2018) AS DIFERENCIA
+                        FROM (
+                            SELECT cantidad_pib AS CANTIDAD_2020,b.nombre AS Pais  FROM Calculo_year t
+                            INNER JOIN PIB3 a ON a.id_pib = t.pib_id
+                            INNER JOIN Pais3 b ON b.id_Pais = a.pais_id
+                            WHERE cyear_id=(SELECT id_year FROM Cyear WHERE n_year='2020')
+                            ) t2
+                        INNER JOIN (
+                                SELECT cantidad_pib AS CANTIDAD_2018,b.nombre AS Pais FROM Calculo_year t
+                                INNER JOIN PIB3 a ON a.id_pib = t.pib_id
+                                INNER JOIN Pais3 b ON b.id_Pais = a.pais_id
+                                WHERE cyear_id=(SELECT id_year FROM Cyear WHERE n_year='2018')
+                            )  t3
+                            ON t2.Pais=t3.Pais
+                            WHERE t2.CANTIDAD_2020 !=0 AND t3.CANTIDAD_2018 !=0
+                            ORDER BY t2.CANTIDAD_2020 ASC, t3.CANTIDAD_2018 ASC;''')
+    f.write("Pais, DIFERENCIA\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 11\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT a1.nombre AS Pais,ROUND(SUM(b.people_fully_vaccinated)/
+                        (SELECT R2.cantidad FROM
+                        (SELECT r.pais, COUNT(r.pais) AS cantidad FROM (
+                            SELECT a.nombre AS Pais,b.people_fully_vaccinated AS total_Pais  FROM Covid_PIB t
+                                INNER JOIN Pais a ON a.id_Pais = t.id_Pais
+                                INNER JOIN Covid_data b ON b.id_covid = t.id_covid
+                                WHERE t.people_fully_vaccinated is not null
+                                GROUP BY a.nombre,b.people_fully_vaccinated ) AS R
+                        WHERE r.pais= a1.nombre GROUP BY r.pais) AS R2),2) AS Promedio
+                    FROM Covid_PIB t1
+                    INNER JOIN Pais a1 ON a1.id_Pais = t1.id_Pais
+                    INNER JOIN Covid_data b ON b.id_covid = t1.id_covid
+                    WHERE t1.people_fully_vaccinated is not null
+                    GROUP BY a1.nombre ORDER BY a1.nombre ASC;''')
+    f.write("Pais, Promedio\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 12\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT a1.nombre AS Pais,ROUND(SUM(b.total_deaths)/
+                        (SELECT R2.cantidad FROM
+                        (SELECT r.pais, COUNT(r.pais) AS cantidad FROM (
+                            SELECT a.nombre AS Pais,b.total_deaths AS total_Pais  FROM Covid_PIB t
+                                INNER JOIN Pais a ON a.id_Pais = t.id_Pais
+                                INNER JOIN Covid_data b ON b.id_covid = t.id_covid
+                                WHERE b.total_deaths is not null AND a.cardiovasc_death_rate > 0 AND a.diabetes_prevalence > 0
+                                GROUP BY a.nombre,b.total_deaths ) AS R
+                    WHERE r.pais= a1.nombre GROUP BY r.pais) AS R2),2) AS Promedio
+                    FROM Covid_PIB t1
+                    INNER JOIN Pais a1 ON a1.id_Pais = t1.id_Pais
+                    INNER JOIN Covid_data b ON b.id_covid = t1.id_covid
+                    WHERE b.total_deaths is not null AND a1.cardiovasc_death_rate > 0 AND a1.diabetes_prevalence > 0
+                    GROUP BY a1.nombre ORDER BY a1.nombre ASC;''')
+    f.write("Pais, Promedio\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+    
     
     f.close()
 
