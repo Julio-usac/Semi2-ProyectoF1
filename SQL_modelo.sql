@@ -8,7 +8,6 @@ CREATE TABLE Continente(
 	id_continente INT PRIMARY KEY IDENTITY (1, 1),
 	nombre varchar(100)
 );
-
 CREATE TABLE Pais(
 	id_Pais INT PRIMARY KEY IDENTITY (1, 1),
 	iso varchar(100),
@@ -31,7 +30,6 @@ CREATE TABLE Pais(
 	id_continente INT,
     FOREIGN KEY (id_continente) REFERENCES Continente(id_continente)
 );
-
 CREATE TABLE Covid_data(
 	id_covid INT PRIMARY KEY IDENTITY (1, 1),
 	iso varchar(100),
@@ -56,14 +54,12 @@ CREATE TABLE Covid_data(
 	stringency_index float,
 	excess_mortality float
 );
-
 CREATE TABLE PIB_data(
 	id_pib INT PRIMARY KEY IDENTITY (1, 1),
 	yearr int,
 	pib float,
 	iso varchar(100)
 );
-
 CREATE TABLE Covid_PIB(
 	id_pais INT,
 	id_pib INT,

@@ -10,15 +10,40 @@ from io import StringIO
 from datetime import datetime
 import csv
 
-def generar_reporte(contenido):
+def generar_reporte(contenido, nombre=""):
     try:
-        salida=str(Path(__file__).parent.absolute())+"\\Consultas.txt"
+        salida=str(Path(__file__).parent.absolute())+"\\"+nombre+".txt"
         file = open(salida, "w")
         file.write(contenido)
         file.close()
     except Exception as e:
         print(e)
-        
+
+def generar_bitacora():
+    try:
+        file=""
+        file = file + "#######################-----BITACORA----#######################\n"
+        file = file + "|       HORA      |    FECHA   |   TIPO  |              DESCRIPCION             |\n"
+        for value in bitacora:
+            file = file + "|-------------------------------------------------------------------------------|\n"
+            file = file + f'''| {value['hora']} | {value['fecha']} | {value['tipo']} | {value['descripcion']} |\n'''
+        return file
+    except Exception as e:
+        print(e)
+
+def reporte_bitacora():
+    try:
+        generar_reporte(generar_bitacora(),"RBitacora")
+        print('***** ---Report bitacora realizado con exito--- *****\n')
+
+        _=input('Enter para continuar--$>')
+        return ''
+    except Exception as e:
+        print('')
+        print(f'Error al ejecutar el reporte: {e}')
+        _=input('Enter para continuar--$>')
+        return ''
+
 def generacion_archivo(opcion,datos):
     file=""
     if opcion == 1:
@@ -127,7 +152,7 @@ def extraer_0():
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'extraer','descripcion':'Se extrajo la informacion de economia'})
         print('')
         print('***** ---La extraccion se realizado con exito--- *****\n')
-        
+
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
@@ -139,7 +164,7 @@ def extraer_0():
 def transform_1():
     global reader
     global reader2
-    
+
     print('Realizando la transformacion de los datos ...')
     print('...')
 
@@ -172,7 +197,7 @@ def transform_1():
         reader['tests_units'] = reader['tests_units'].replace(0, '')
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se corrigio el formato'})
         #Data Limpia
-        reader.to_csv('clean_data.csv', encoding='utf-8', index=False)        
+        reader.to_csv('clean_data.csv', encoding='utf-8', index=False)
         print('')
         print('***** ---Transformacion realizado con exito--- *****\n')
 
@@ -190,7 +215,7 @@ def transform_1():
         reader2.to_csv('clean_data_econo.csv', encoding='utf-8', index=False)
         print('')
         print('***** ---Transformacion realizado con exito--- *****\n')
-        
+
         _=input('Enter para continuar--$>')
         return ''
     except Exception as e:
@@ -214,6 +239,7 @@ def crear_datamarts_0():
                     with conn.cursor() as cur3:
                         cur3.execute(statement0)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el datamart covid'})
+        #Insercion de datamart covid
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO Continente2(nombre) SELECT DISTINCT continent FROM Temporal''')
         conn.commit()
@@ -234,6 +260,28 @@ def crear_datamarts_0():
                             stringency_index, excess_mortality, id_Pais FROM Temporal, Pais2
                             WHERE Temporal.locationn=Pais2.nombre;
                        ''')
+        conn.commit()
+        conn.close()
+        #Creacion de datamart impacto
+        conn = pyodbc.connect(conn_data)
+        #Creacion de datamart covid
+        inputdir2 = Path(__file__).with_name('SQL_datamart_impacto.sql')
+        with inputdir2.open('r') as creats2:
+            sqlScript2 = creats2.read()
+            for statement2 in sqlScript2.split(';'):
+                if statement2:
+                    with conn.cursor() as cur2:
+                        cur2.execute(statement2)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el datamart impacto'})
+        #Insercion de datamart covid
+        inputdir3 = Path(__file__).with_name('SQL_carga_impacto.sql')
+        with inputdir3.open('r') as creats3:
+            sqlScript3 = creats3.read()
+            for statement3 in sqlScript3.split(';'):
+                if statement3:
+                    with conn.cursor() as cur3:
+                        cur3.execute(statement3)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se inserto data en el datamart impacto'})
         conn.commit()
         conn.close()
         print('***** ---Datamarts creados y cargados con exito--- *****')
@@ -259,7 +307,6 @@ def crear_modelo_0():
                     with conn.cursor() as cur3:
                         cur3.execute(statement0)
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el modelo'})
-       
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO Continente(nombre) SELECT DISTINCT continent FROM Temporal''')
         conn.commit()
@@ -347,7 +394,6 @@ def crear_modelo_0():
                                                                            INNER JOIN Covid_data ON Covid_data.iso=Pais.iso
                                                                            INNER JOIN PIB_data ON PIB_data.iso=Pais.iso''')
         conn.commit()
-
         conn.close()
         print('***** ---Modelo creado y cargado con exito--- *****')
         _=input('Enter para continuar--$>')
@@ -395,7 +441,7 @@ def cargar_temp_2():
         conn.close()
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'transformar','descripcion':'Se cargaron los datos a la tabla temporal covid'})
         print('')
-        print('***** ---Carga realizado con exito--- *****\n')
+        print('***** ---Carga realizada con exito--- *****\n')
 
         #ECONOMIA
         conn = pyodbc.connect(conn_data)
@@ -492,6 +538,7 @@ opciones ={
     '3' : {'Des': 'Crear Modelo', 'Funcion': crear_modelo_0, 'Param1':'p1','Param2' :'p2'},
     '4' : {'Des': 'Crear Datamarts', 'Funcion': crear_datamarts_0, 'Param1':'p1','Param2' :'p2'},
     '5' : {'Des': 'Realizar Consultas', 'Funcion': cargar_temp_2, 'Param1':'p1','Param2' :'p2'},
+    '6' : {'Des': 'Realizar bitacora', 'Funcion': reporte_bitacora, 'Param1':'p1','Param2' :'p2'},
     'x' : {'Des': 'Salir', 'Funcion': cerrando_programa, 'Param1':'p1','Param2' :'p2'}
     }
 

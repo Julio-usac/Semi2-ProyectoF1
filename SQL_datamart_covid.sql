@@ -1,5 +1,4 @@
 use covid;
-
 DROP TABLE IF EXISTS Covid_data2;
 DROP TABLE IF EXISTS Pais2;
 DROP TABLE IF EXISTS Continente2;
@@ -7,7 +6,6 @@ CREATE TABLE Continente2(
 	id_continente INT PRIMARY KEY IDENTITY (1, 1),
 	nombre varchar(100)
 );
-
 CREATE TABLE Pais2(
 	id_Pais INT PRIMARY KEY IDENTITY (1, 1),
 	iso varchar(100),
@@ -30,7 +28,6 @@ CREATE TABLE Pais2(
 	id_continente INT,
     FOREIGN KEY (id_continente) REFERENCES Continente2(id_continente)
 );
-
 CREATE TABLE Covid_data2(
 	id_covid INT PRIMARY KEY IDENTITY (1, 1),
 	datee varchar(255),
