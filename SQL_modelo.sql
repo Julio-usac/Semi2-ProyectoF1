@@ -65,8 +65,10 @@ CREATE TABLE PIB_data(
 );
 
 CREATE TABLE Covid_PIB(
-	id_Pais INT,
+	id_pais INT,
 	id_pib INT,
-    FOREIGN KEY (id_Pais) REFERENCES Pais(id_Pais),
-	FOREIGN KEY (id_pib) REFERENCES PIB_data(id_pib)
+	id_covid INT,
+    FOREIGN KEY (id_pais) REFERENCES Pais(id_Pais),
+	FOREIGN KEY (id_pib) REFERENCES PIB_data(id_pib),
+	FOREIGN KEY (id_covid) REFERENCES Covid_data(id_covid)
 );
