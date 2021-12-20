@@ -104,6 +104,66 @@ def generacion_archivo():
         f.write(str(i[0])+"||"+str(i[1])+"||"+str(i[2])+"\n")
     
     f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 5\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT Pais, a2018, a2020, (((a2020-a2018)/a2020)*100) AS Cambio_Relativo FROM (
+                          SELECT Pais_SG.nombre AS Pais, PIB_SG.pib AS a2018 FROM Pais_SG
+                          INNER JOIN PIB_SG ON PIB_SG.iso=Pais_SG.iso
+                          WHERE PIB_SG.yearr=2018 and PIB_SG.pib!=0
+                      ) con1 INNER JOIN (
+                          SELECT Pais_SG.nombre AS Pais1, PIB_SG.pib AS a2020 FROM Pais_SG
+                          INNER JOIN PIB_SG ON PIB_SG.iso=Pais_SG.iso
+                          WHERE PIB_SG.yearr=2020 and PIB_SG.pib!=0
+                      )con2 ON con1.Pais=con2.Pais1;''')
+    f.write("Pais, 2018, 2019, Cambio Relativo\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"||"+str(i[2])+"||"+str(i[3])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 6\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT TOP 7 Pais, a2019, a2020, ((ABS(a2020-a2019)/a2020)*100) AS Cambio_Absoluto FROM (
+                          SELECT Pais_SG.nombre AS Pais, PIB_SG.pib AS a2019 FROM Pais_SG
+                          INNER JOIN PIB_SG ON PIB_SG.iso=Pais_SG.iso
+                          WHERE PIB_SG.yearr=2019 and PIB_SG.pib!=0
+                      ) con1 INNER JOIN (
+                          SELECT Pais_SG.nombre AS Pais1, PIB_SG.pib AS a2020 FROM Pais_SG
+                          INNER JOIN PIB_SG ON PIB_SG.iso=Pais_SG.iso
+                          WHERE PIB_SG.yearr=2020 and PIB_SG.pib!=0
+                      )con2 ON con1.Pais=con2.Pais1
+                          ORDER BY Cambio_Absoluto DESC;''')
+    f.write("Pais, 2019, 2020, Cambio Absoluto\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"||"+str(i[2])+"||"+str(i[3])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 7\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT Pais.nombre, AVG(Covid_data.new_cases) AS Promedio FROM Pais
+                      INNER JOIN Covid_data ON Covid_data.iso=Pais.iso
+                      WHERE Covid_data.new_cases!=0
+                      GROUP BY Pais.nombre;''')
+    f.write("Pais, Promedio contagios por dia\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+
+    f.write("Consulta 8\n")
+    f.write("-----------------------------------------------------------\n")
+    cursor.execute('''SELECT Pais.nombre, AVG(Covid_data.new_deaths) AS Promedio FROM Pais
+                      INNER JOIN Covid_data ON Covid_data.iso=Pais.iso
+                      WHERE Covid_data.new_deaths!=0
+                      GROUP BY Pais.nombre;''')
+    f.write("Pais, Promedio de muertes por dia\n")
+    for i in cursor:
+         f.write(str(i[0])+"||"+str(i[1])+"\n")
+  
+    f.write("\n-----------------------------------------------------------\n")
+    
     f.close()
 
 def extraer_0():
@@ -515,7 +575,7 @@ reader2 = pd.read_csv(Path(__file__).with_name('Dataset Economia.csv'))
 bitacora = []
 now = datetime.now()
 server='DESKTOP-6RRBLEB\SQLEXPRESS'
-bd = 'tnami'
+bd = 'covid'
 user = 'hdb1'
 password = '1234'
 conn_data = 'DRIVER={ODBC Driver 17 for SQL server}; SERVER='+server+'; DATABASE='+bd+'; UID='+user+'; PWD='+password
