@@ -284,6 +284,28 @@ def crear_datamarts_0():
         bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se inserto data en el datamart impacto'})
         conn.commit()
         conn.close()
+        #Datamart combinado
+        conn = pyodbc.connect(conn_data)
+        #Creacion de datamart combinado
+        inputdirS = Path(__file__).with_name('SQL_datamart_combi.sql')
+        with inputdirS.open('r') as creatsS:
+            sqlScriptS = creatsS.read()
+            for statementS in sqlScriptS.split(';'):
+                if statementS:
+                    with conn.cursor() as curS:
+                        curS.execute(statementS)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se creo el datamart combinado'})
+        #Insercion en datamart combinado
+        inputdirG = Path(__file__).with_name('SQL_carga_combi.sql')
+        with inputdirG.open('r') as creatsG:
+            sqlScriptG = creatsG.read()
+            for statementG in sqlScriptG.split(';'):
+                if statementG:
+                    with conn.cursor() as curG:
+                        curG.execute(statementG)
+        bitacora.append({'hora':str(now.time()),'fecha': str(now.date()),'tipo':'Crear','descripcion':'Se inserto data en el datamart combinado'})
+        conn.commit()
+        conn.close()
         print('***** ---Datamarts creados y cargados con exito--- *****')
         _=input('Enter para continuar--$>')
         return ''
